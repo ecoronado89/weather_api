@@ -4,7 +4,7 @@
   "description": "API testing framework for www.wunderground.com",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 2000 test/test.js"
+    "test": "mocha --timeout 2000 --reporter spec test/test.js"
   },
   "repository": {
     "type": "git",

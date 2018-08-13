@@ -11,18 +11,25 @@ const cheerio = require('cheerio');
 
 describe('California - San Francisco', () => {
 
-    let weatherResponse;
-    let feelsLikeResponse;
-    let temperatureResponse;
+    const htmlResponses = {
+        weatherResponse: '',
+        feelsLikeResponse: '',
+        temperatureResponse: '',
+        humidityResponse: '',
+        preassureResponse: '',
+        dewPointResponse: ''
+    }
     let apiResponse;
 
     before(() => {
         return chakram.get('https://weather.com/weather/today/l/USCA0987:1:US')
             .then(reponse => {
                 const $ = cheerio.load(reponse.body);
-                weatherResponse = $('.today_nowcard-phrase').text();
-                temperatureResponse = $('today_nowcard-temp span').text();
-                feelsLikeResponse = $('.deg-feels').text();
+                htmlResponses.weatherResponse = $('.today_nowcard-phrase').text();
+                htmlResponses.temperatureResponse = $('.today_nowcard-temp').text();
+                htmlResponses.feelsLikeResponse = $('.deg-feels').text();
+                htmlResponses.humidityResponse = $('.today_nowcard-sidecar tbody tr:nth-child(2) td > span > span').text();
+                htmlResponses.dewPointResponse = $ ('.today_nowcard-sidecar table tr:nth-child(3) td').text();
                 return chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
             })
             .then(response => {
@@ -31,15 +38,25 @@ describe('California - San Francisco', () => {
     })
 
     it('Weather', () => {
-        expect(weatherResponse, 'Weather values does not match').to.be.equal(apiResponse.weather);
+        expect(htmlResponses.weatherResponse, 'Returned weather values does not match').to.be.equal(apiResponse.weather);
     }),
 
     it('Feels Like', () => {
-        expect(parseInt(feelsLikeResponse)).to.be.equal(parseInt(apiResponse.feelslike_f))
+        expect(parseInt(htmlResponses.feelsLikeResponse), 'Returned Feels Like values does not match').to.be.equal(parseInt(apiResponse.feelslike_f))
     }),
 
     it('Temperature', () => {
-        expect(parseInt(temperatureResponse)).to.be.equal(parseInt(apiResponse.temp_f))
+        htmlResponses.temperatureResponse = htmlResponses.temperatureResponse.replace('°','');
+        expect(htmlResponses.temperatureResponse, 'Returned temperature values does not match').to.be.equal(apiResponse.temp_f)
+    }),
+
+    it('Humidity', () => {
+        expect(htmlResponses.humidityResponse, 'Returned humidity values does not match').to.be.equal(apiResponse.relative_humidity);
+    }),
+
+    it('Dew Point', () => {
+        htmlResponses.dewPointResponse = htmlResponses.dewPointResponse.replace('°','');
+        expect(parseInt(htmlResponses.dewPointResponse), 'Returned dew point values does not match').to.be.equal(apiResponse.dewpoint_f)
     })
 
 });

@@ -7,58 +7,39 @@ require('dotenv').config()
 require('it-each')();
 require('it-each')({ testPerIteration: true });
 
-describe('Weather API', () => {
+const cheerio = require('cheerio');
 
-    describe('California - San Francisco', () => {
-        it('Weather', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-            .then(response => {
-                expect(response.body.current_observation.weather).to.be.equal('Clear');
-            })
-        ),
+describe('California - San Francisco', () => {
 
-        it('Temperature Celsious', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-            .then(response => {
-                expect(response.body.current_observation.temp_c).to.be.equal(18.1);
-            })
-        ),
+    let weatherResponse;
+    let feelsLikeResponse;
+    let temperatureResponse;
+    let apiResponse;
 
-        it('Temperature Celsious', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-            .then(response => {
-                 expect(response.body.current_observation.wind_kph).to.be.equal(12.9);
+    before(() => {
+        return chakram.get('https://weather.com/weather/today/l/USCA0987:1:US')
+            .then(reponse => {
+                const $ = cheerio.load(reponse.body);
+                weatherResponse = $('.today_nowcard-phrase').text();
+                temperatureResponse = $('today_nowcard-temp span').text();
+                feelsLikeResponse = $('.deg-feels').text();
+                return chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
             })
-         ),
+            .then(response => {
+                apiResponse = response.body.current_observation;
+            })
+    })
 
-        it('Wind Direction', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-            .then(response => {
-                expect(response.body.current_observation.wind_dir).to.be.equal('WSW');
-            })
-        )
+    it('Weather', () => {
+        expect(weatherResponse, 'Weather values does not match').to.be.equal(apiResponse.weather);
     }),
 
-    describe('Colorado - Aspen', () => {
-        it('Weather', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CO/Aspen.json`)
-            .then(response => {
-                expect(response.body.current_observation.weather).to.be.equal('Clear');
-            })
-        ),
+    it('Feels Like', () => {
+        expect(parseInt(feelsLikeResponse)).to.be.equal(parseInt(apiResponse.feelslike_f))
+    }),
 
-        it('Temperature Fahrenheit', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CO/Aspen.json`)
-            .then(response => {
-                expect(response.body.current_observation.temp_f).to.be.equal(85);
-            })
-        ),
-
-        it('Feels Like', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CO/Aspen.json`)
-            .then(response => {
-                 expect(response.body.current_observation.feelslike_string).to.be.equal('83 F (28 C)');
-            })
-         ),
-
-        it('Relative Humidity', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CO/Aspen.json`)
-            .then(response => {
-                expect(response.body.current_observation.relative_humidity).to.be.equal('17%');
-            })
-        )
+    it('Temperature', () => {
+        expect(parseInt(temperatureResponse)).to.be.equal(parseInt(apiResponse.temp_f))
     })
 
 });

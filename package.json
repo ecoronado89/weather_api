@@ -4,7 +4,7 @@
   "description": "API testing framework for www.wunderground.com",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 2000 --reporter spec test/Conditions.js"
+    "test": "mocha --timeout 20000 --reporter spec test/Conditions.js"
   },
   "repository": {
     "type": "git",
@@ -19,8 +19,12 @@
   "dependencies": {
     "chai": "^4.1.2",
     "chakram": "^1.5.0",
+    "cheerio": "^1.0.0-rc.2",
     "dotenv": "^6.0.0",
     "it-each": "^0.4.0",
     "mocha": "^5.2.0"
+  },
+  "devDependencies": {
+    "mocha-prepare": "^0.1.0"
   }
 }

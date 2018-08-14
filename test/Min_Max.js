@@ -7,29 +7,23 @@ require('dotenv').config()
 require('it-each')();
 require('it-each')({ testPerIteration: true });
 
-describe('California - San Francisco', () => {
+const cheerio = require('cheerio');
 
-    it('Weather', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-        .then(response => {
-            expect(response.body.current_observation.weather).to.be.equal('Clear');
-        })
-    ),
+describe('10 Day Forecast', () => {
+    
+let forecast;
 
-    it('Temperature Celsious', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
+    before(() => {
+        return chakram.get(`${process.env.URL}/${process.env.KEY}/forecast10day/q/CA/San_Francisco.json`)
         .then(response => {
-            expect(response.body.current_observation.temp_c).to.be.equal(29.3);
+            forecast = response.body.forecast.simpleforecast.forecastday
         })
-    ),
+    })
 
-    it('Wind KPH', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
-        .then(response => {
-            expect(response.body.current_observation.wind_kph).to.be.equal(3.2);
+    for(let i = 0; i < 10; i += 1){
+        it(`Temperature comparisson day: ${i}`, () => {
+            let diff = Math.abs(forecast[i].low.fahrenheit - forecast[i].high.fahrenheit);
+            expect(diff, 'Temperature difference is greater than 20 degress').to.be.below(20);
         })
-    ),
-
-    it('Station Id', () => chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/VA/Williamsburg.json`)
-        .then(response => {
-            expect(response.body.current_observation.station_id).to.be.equal('KVAWILLI11');
-        })
-    )
-});
+    }
+})

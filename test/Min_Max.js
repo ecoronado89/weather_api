@@ -14,7 +14,7 @@ describe('10 Day Forecast', () => {
 let forecast;
 
     before(() => {
-        return chakram.get(`${process.env.URL}/${process.env.KEY}/forecast10day/q/CA/San_Francisco.json`)
+        return chakram.get(`${process.env.API}/${process.env.KEY}/forecast10day/q/CA/San_Francisco.json`)
         .then(response => {
             forecast = response.body.forecast.simpleforecast.forecastday
         })

@@ -22,7 +22,7 @@ describe('California - San Francisco', () => {
     let apiResponse;
 
     before(() => {
-        return chakram.get('https://weather.com/weather/today/l/USCA0987:1:US')
+        return chakram.get(process.env.URL)
             .then(reponse => {
                 const $ = cheerio.load(reponse.body);
                 htmlResponses.weatherResponse = $('.today_nowcard-phrase').text();
@@ -30,7 +30,7 @@ describe('California - San Francisco', () => {
                 htmlResponses.feelsLikeResponse = $('.deg-feels').text();
                 htmlResponses.humidityResponse = $('.today_nowcard-sidecar tbody tr:nth-child(2) td > span > span').text();
                 htmlResponses.dewPointResponse = $ ('.today_nowcard-sidecar table tr:nth-child(3) td').text();
-                return chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
+                return chakram.get(`${process.env.API}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
             })
             .then(response => {
                 apiResponse = response.body.current_observation;

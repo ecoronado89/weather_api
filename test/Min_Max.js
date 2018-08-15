@@ -21,7 +21,7 @@ let forecast;
     })
 
     for(let i = 0; i < 10; i += 1){
-        it(`Temperature comparisson day: ${i}`, () => {
+        it(`Temperature comparisson day: ${i+1}`, () => {
             let diff = Math.abs(forecast[i].low.fahrenheit - forecast[i].high.fahrenheit);
             expect(diff, 'Temperature difference is greater than 20 degress').to.be.below(20);
         })

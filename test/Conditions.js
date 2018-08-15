@@ -2,12 +2,14 @@ const chakram = require('chakram');
 
 const { expect } = chakram;
 
-require('dotenv').config()
+require('dotenv').config();
 
 require('it-each')();
 require('it-each')({ testPerIteration: true });
 
 const cheerio = require('cheerio');
+
+const cssSelectors = require('../src/selectors/cssSelectors');
 
 describe('California - San Francisco', () => {
 
@@ -22,15 +24,17 @@ describe('California - San Francisco', () => {
     let apiResponse;
 
     before(() => {
-        return chakram.get('https://weather.com/weather/today/l/USCA0987:1:US')
+        //search state/city based on ENV.VAR
+
+        return chakram.get(process.env.URL)
             .then(reponse => {
                 const $ = cheerio.load(reponse.body);
-                htmlResponses.weatherResponse = $('.today_nowcard-phrase').text();
-                htmlResponses.temperatureResponse = $('.today_nowcard-temp').text();
-                htmlResponses.feelsLikeResponse = $('.deg-feels').text();
-                htmlResponses.humidityResponse = $('.today_nowcard-sidecar tbody tr:nth-child(2) td > span > span').text();
-                htmlResponses.dewPointResponse = $ ('.today_nowcard-sidecar table tr:nth-child(3) td').text();
-                return chakram.get(`${process.env.URL}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`)
+                htmlResponses.weatherResponse = $(cssSelectors.weather).text();
+                htmlResponses.temperatureResponse = $(cssSelectors.temperature).text();
+                htmlResponses.feelsLikeResponse = $(cssSelectors.feelsLike).text();
+                htmlResponses.humidityResponse = $(cssSelectors.humidity).text();
+                htmlResponses.dewPointResponse = $ (cssSelectors.dewPoint).text();
+                return chakram.get(`${process.env.API}/${process.env.KEY}/conditions/q/CA/San_Francisco.json`);
             })
             .then(response => {
                 apiResponse = response.body.current_observation;
@@ -42,12 +46,11 @@ describe('California - San Francisco', () => {
     }),
 
     it('Feels Like', () => {
-        expect(parseInt(htmlResponses.feelsLikeResponse), 'Returned Feels Like values does not match').to.be.equal(parseInt(apiResponse.feelslike_f))
+        expect(htmlResponses.feelsLikeResponse, 'Returned Feels Like values does not match').to.be.equal(apiResponse.feelslike_f);
     }),
 
     it('Temperature', () => {
-        htmlResponses.temperatureResponse = htmlResponses.temperatureResponse.replace('°','');
-        expect(htmlResponses.temperatureResponse, 'Returned temperature values does not match').to.be.equal(apiResponse.temp_f)
+        expect(htmlResponses.temperatureResponse, 'Returned temperature values does not match').to.be.equal(apiResponse.temp_f);
     }),
 
     it('Humidity', () => {
@@ -55,8 +58,7 @@ describe('California - San Francisco', () => {
     }),
 
     it('Dew Point', () => {
-        htmlResponses.dewPointResponse = htmlResponses.dewPointResponse.replace('°','');
-        expect(parseInt(htmlResponses.dewPointResponse), 'Returned dew point values does not match').to.be.equal(apiResponse.dewpoint_f)
+        expect(htmlResponses.dewPointResponse, 'Returned dew point values does not match').to.be.equal(apiResponse.dewpoint_f);
     })
 
 });
